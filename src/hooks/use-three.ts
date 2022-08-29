@@ -4,7 +4,8 @@ import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 import { ThreeTarget, BoxGeometryOption, Point } from "@/shared/types";
 
 type ThreeOption = {
-  scenebgcolor: string;
+  scenebgcolor?: string;
+  scenebg?: THREE.Texture;
 };
 
 interface UseThree {
@@ -24,7 +25,11 @@ interface UseThree {
    * 创建透视摄像机
    * @returns 摄像机
    */
-  perspectiveCamera: (point?: Point) => THREE.Camera;
+  perspectiveCamera: (
+    point?: Point,
+    near?: number,
+    far?: number
+  ) => THREE.Camera;
   /**
    * 创建轨道控制器
    * @param camera 相机
@@ -54,6 +59,7 @@ interface UseThree {
 export default function useThree(
   options: ThreeOption = {
     scenebgcolor: "#000",
+    scenebg: undefined,
   }
 ): UseThree {
   /**three对象 */
@@ -73,8 +79,13 @@ export default function useThree(
     container = dom;
     // 场景
     currentThree.scene = new THREE.Scene();
-    const { scenebgcolor } = options;
-    currentThree.scene.background = new THREE.Color(scenebgcolor);
+    const { scenebgcolor, scenebg } = options;
+    // 背景色
+    scenebgcolor &&
+      (currentThree.scene.background = new THREE.Color(scenebgcolor));
+    // 纹理
+    scenebg && (currentThree.scene.background = scenebg);
+
     return currentThree.scene;
   }
 
@@ -84,7 +95,13 @@ export default function useThree(
    */
   function initRenderer(): THREE.WebGL1Renderer {
     // 渲染器
-    currentThree.renderer = new THREE.WebGL1Renderer();
+    currentThree.renderer = new THREE.WebGL1Renderer({
+      // 抗锯齿
+      antialias: true,
+      // 对数深度缓冲区 (加载外部模型去除闪烁适用)
+      logarithmicDepthBuffer: true,
+    });
+    currentThree.renderer.outputEncoding = THREE.sRGBEncoding;
     currentThree.renderer.setSize(
       container?.scrollWidth || 1000,
       container?.scrollHeight || 800
@@ -98,14 +115,16 @@ export default function useThree(
    * @returns 摄像机
    */
   function perspectiveCamera(
-    point: Point = { x: 0, y: 0, z: 10 }
+    point: Point = { x: 0, y: 0, z: 10 },
+    near?: number,
+    far?: number
   ): THREE.Camera {
     currentThree.camera && currentThree.scene?.remove(currentThree.camera);
     currentThree.camera = new THREE.PerspectiveCamera(
       75, // 视野角度
       (container?.scrollWidth || 1000) / (container?.scrollHeight || 800), // 长宽比
-      0.1, // 近截面,小于这个距离，不渲染
-      800 // 远截面，超过这个距离，不渲染
+      near || 0.1, // 近截面,小于这个距离，不渲染
+      far || 800 // 远截面，超过这个距离，不渲染
     );
     // 设置相机位置
     const { x, y, z } = point;

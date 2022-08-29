@@ -1,81 +1,94 @@
 <script lang="ts" setup>
-// 目标：几何体
 import * as THREE from 'three';
-// 导入轨道控制器
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { PlaneGeometry } from 'three';
+import useThree from '../hooks/use-three';
+import gsap from 'gsap';
+
+// LoadingManager 加载管理器
+
+const { currentThree, crateScene, initRenderer, perspectiveCamera, orbitControls, axesHelper, render } = useThree({ scenebgcolor: "#eee" });
 
 onMounted(() => {
-    init();
-})
+    const container = document.querySelector(".demo");
+    crateScene(container as Element);
+    initRenderer();
+    perspectiveCamera({ x: 10, y: 10, z: 30 });
+    const controls = orbitControls();
+    axesHelper();
 
-const animateList: gsap.core.Tween[] = [];
+    let geometry: THREE.BufferGeometry;
+    let material: THREE.Material;
+    let materialColor: THREE.Color;
+    // 立方缓冲几何体
+    geometry = new THREE.BoxGeometry(5, 5, 5);
+    // materialColor = new THREE.Color(Math.random(), Math.random(), Math.random());
 
-let render: THREE.WebGL1Renderer;
+    //  设置加载器
+    const loadingManager = new THREE.LoadingManager();
 
-function init() {
-    // 创建场景
-    const scene = new THREE.Scene();
-    const container = document.querySelector('.demo02');
-    // 创建相机,透视相机
-    const camera = new THREE.PerspectiveCamera(75,
-        (container?.scrollWidth || 1000) / (container?.scrollHeight || 800),
-        0.1,
-        800
-    );
-    // 设置相机位置
-    camera.position.set(0, 0, 10); // x,y,z
-    scene.add(camera);
-    scene.background = new THREE.Color("#eee");
-    // 添加物体
-    // 创建几何体
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    // 几何体材质
-    const material = new THREE.MeshBasicMaterial({ color: "#999" })
-    // 物体
+    loadingManager.onLoad = () => {
+        console.log("加载完成")
+    }
+    loadingManager.onProgress = (url: string, itemsLoaded: number, itemsTotal: number) => {
+        // itemsLoaded 已加载数
+        // itemsTotal 总数
+        console.log("加载进度", Number(((itemsLoaded / itemsTotal) * 100).toFixed(2)) + '%')
+    }
+    loadingManager.onError = (url) => {
+        console.log("加载错误", url)
+    }
+
+    // 纹理加载器
+    const textureLoader = new THREE.TextureLoader(loadingManager);
+    const treeTexture = textureLoader.load(new URL(`./../assets/images/test.png`, import.meta.url).href);
+    // const alphaTexture = textureLoader.load("");// 加载黑白底色图片，黑色部分为透明部分，白色为不透明部分
+    // 设置纹理中心点
+    treeTexture.center.set(0.5, 0.5);
+    material = new THREE.MeshStandardMaterial({
+        color: "#fff", // 颜色
+        map: treeTexture, // 贴图
+        // alphaMap: alphaTexture,  // 灰度纹理贴图
+        transparent: true, // 是否呈现透明
+        side: THREE.DoubleSide  // 设置渲染哪一面，默认设置渲染正面
+    });
     const cube = new THREE.Mesh(geometry, material);
+    cube.position.set(0, 0, 0);
+    currentThree.scene?.add(cube);
 
-    scene.add(cube);
-    // 初始化渲染器
-    render = new THREE.WebGL1Renderer();
-    render.setSize((container?.scrollWidth || 1000), (container?.scrollHeight || 800));
-    // 挂在到元素上
-    document.querySelector('.demo02')?.appendChild(render.domElement);
+    const planeGeometry = new PlaneGeometry(1, 1)
+    const plan = new THREE.Mesh(planeGeometry, material);
+    planeGeometry.setAttribute("uv2", new THREE.BufferAttribute(planeGeometry.attributes.uv.array, 2))
+    plan.position.set(6, 0, 0);
+    currentThree.scene?.add(plan);
 
-    // 创建轨道控制器
-    const controls = new OrbitControls(camera, render.domElement);
-    // 设置控制器阻尼，类似重力感应效果，并设置控制器update
-    controls.enableDamping = true;
-    // 添加坐标轴辅助器
-    // 红色代表X轴,绿色代表Y轴,黄色代表Z轴
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-    // clock时间控制器
-    const clock = new THREE.Clock();
+    // 灯光设置
 
-    render3D({ time: undefined, scene, camera, cube, clock, controls });
-}
+    // 环境光，四面八方，不会产生阴影
+    // const light = new THREE.AmbientLight(undefined, 1); // 颜色，强度
+    // currentThree.scene?.add(light);
 
-type ThreeOptions = {
-    time?: number,
-    scene: THREE.Scene, // 场景
-    camera: THREE.PerspectiveCamera, // 相机
-    cube: THREE.Mesh, // 物体
-    clock: THREE.Clock,
-    controls: OrbitControls
-}
+    // 平行光(灯泡，太阳)
+    const directionalLight = new THREE.DirectionalLight("#fff", 1);
+    directionalLight.position.set(10, 10, 10);
+    currentThree.scene?.add(directionalLight);
 
-function render3D(option: ThreeOptions) {
-    const { time = 0, scene, camera, cube, clock, controls } = option;
-    controls.update();
-    render.render(scene, camera);
-    // 浏览器每一次刷新都执行渲染
-    requestAnimationFrame((time) => render3D(option));
-}
+
+    // gsap.to(light, {
+    //     intensity: 0, // 动画变更属性
+    //     duration: 5, //持续时间
+    //     repeat: -1, // 循环次数，-1表示无限循环
+    //     yoyo: true, // 是否往返运动
+    // })
+
+    render(() => {
+        controls.update();
+    });
+})
 
 </script>
 
 <template>
-    <div class="demo02"></div>
+    <div class="demo"></div>
 </template>
 <style lang="scss" scoped>
 .demo02 {

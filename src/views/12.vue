@@ -43,8 +43,6 @@ onMounted(() => {
     plan.position.set(6, 0, 0);
     currentThree.scene?.add(plan);
 
-
-
     render(() => {
         controls.update();
     });

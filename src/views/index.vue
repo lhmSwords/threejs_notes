@@ -1,16 +1,13 @@
 <template>
     <div class="page-container">
-        <div class="side-container">
+        <el-scrollbar class="side-container">
             <el-menu :default-active="defaultActive">
                 <el-menu-item :index="`${index}`" v-for="item, index in menus" :key="item.name"
                     @click="menuClick(item)">
-                    <el-icon>
-                        <Menu />
-                    </el-icon>
                     <span>{{ item.name }}</span>
                 </el-menu-item>
             </el-menu>
-        </div>
+        </el-scrollbar>
         <div class="main-container">
             <router-view v-slot="{ Component }">
                 <component :is="Component" />
@@ -60,6 +57,36 @@ const menus = ref<any[]>([{
 }, {
     name: "透明材质纹理",
     route: "/12"
+}, {
+    name: "标准网格材质",
+    route: "/13"
+}, {
+    name: "光照物理效果",
+    route: "/14"
+}, {
+    name: "光照物理效果",
+    route: "/14"
+}, {
+    name: "纹理进度加载",
+    route: "/15"
+}, {
+    name: "环境贴图",
+    route: "/16"
+}, {
+    name: "经纬映射贴图",
+    route: "/17"
+}, {
+    name: "灯光与阴影",
+    route: "/18"
+}, {
+    name: "聚光灯",
+    route: "/19"
+}, {
+    name: "点光源",
+    route: "/20"
+}, {
+    name: "示例:加载模型",
+    route: "/21"
 }])
 
 function init() {
@@ -77,12 +104,14 @@ init();
 .page-container {
     display: flex;
     flex: 1 0 0%;
+    overflow: hidden;
 }
 
 .side-container {
     width: 200px;
     flex-shrink: 0;
     border-right: 1px solid var(--el-border-color);
+    overflow: auto;
 }
 
 .el-menu {

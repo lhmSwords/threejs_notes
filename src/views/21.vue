@@ -1,84 +1,107 @@
 <script lang="ts" setup>
-// 目标：几何体
 import * as THREE from 'three';
-// 导入轨道控制器
-import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import useThree from '../hooks/use-three';
+import gsap from 'gsap';
+import dat from 'dat.gui';
+// 模型导入器
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+// 模型解压器
+// import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader';
+
+import * as SkeletonUtils from 'three/examples/jsm/utils/SkeletonUtils'
+import { AnimationObjectGroup } from 'three';
+
+const { currentThree, crateScene, initRenderer, perspectiveCamera, orbitControls, axesHelper, render } = useThree({ scenebgcolor: "#f5f5f5" });
 
 onMounted(() => {
-    init();
-})
+    const container = document.querySelector(".demo");
+    crateScene(container as Element);
+    initRenderer();
+    perspectiveCamera({ x: 10, y: 10, z: 10 }, 0.1, 800);
+    const controls = orbitControls();
+    axesHelper();
 
-const animateList: gsap.core.Tween[] = [];
+    if (currentThree.renderer) {
+        currentThree.renderer.shadowMap.enabled = true;
+    }
 
-let render: THREE.WebGL1Renderer;
+    //  设置加载器
+    const loadingManager = new THREE.LoadingManager();
 
-function init() {
-    // 创建场景
-    const scene = new THREE.Scene();
-    const container = document.querySelector('.demo02');
-    // 创建相机,透视相机
-    const camera = new THREE.PerspectiveCamera(75,
-        (container?.scrollWidth || 1000) / (container?.scrollHeight || 800),
-        0.1,
-        800
-    );
-    // 设置相机位置
-    camera.position.set(0, 0, 10); // x,y,z
-    scene.add(camera);
-    scene.background = new THREE.Color("#eee");
-    // 添加物体
-    // 创建几何体
-    const geometry = new THREE.BoxGeometry(1, 1, 1);
-    // 几何体材质
-    const material = new THREE.MeshBasicMaterial({ color: "#999" })
-    // 物体
-    const cube = new THREE.Mesh(geometry, material);
+    loadingManager.onLoad = () => {
+        console.log("加载完成")
+        // 记载完成将物体添加到场景
+        // currentThree.scene?.add(sphere);
+    }
+    loadingManager.onProgress = (url: string, itemsLoaded: number, itemsTotal: number) => {
+        // itemsLoaded 已加载数
+        // itemsTotal 总数
+        console.log("加载进度", Number(((itemsLoaded / itemsTotal) * 100).toFixed(2)) + '%')
+    }
+    loadingManager.onError = (url) => {
+        console.log("加载错误", url)
+    }
 
-    scene.add(cube);
-    // 初始化渲染器
-    render = new THREE.WebGL1Renderer();
-    render.setSize((container?.scrollWidth || 1000), (container?.scrollHeight || 800));
-    // 挂在到元素上
-    document.querySelector('.demo02')?.appendChild(render.domElement);
+    const planeGeometry = new THREE.PlaneGeometry(50, 50);
+    // 材质
+    const material = new THREE.MeshStandardMaterial({
+        side: THREE.DoubleSide
+    });
+    const plane = new THREE.Mesh(planeGeometry, material);
+    plane.position.set(0, 0, 0)
+    plane.rotation.x = - Math.PI / 2;
+    // 设置接收阴影开启
+    plane.receiveShadow = true;
+    currentThree.scene?.add(plane);
 
-    // 创建轨道控制器
-    const controls = new OrbitControls(camera, render.domElement);
-    // 设置控制器阻尼，类似重力感应效果，并设置控制器update
-    controls.enableDamping = true;
-    // 添加坐标轴辅助器
-    // 红色代表X轴,绿色代表Y轴,黄色代表Z轴
-    const axesHelper = new THREE.AxesHelper(5);
-    scene.add(axesHelper);
-    // clock时间控制器
+    // // 环境光，四面八方，不会产生阴影
+    const light = new THREE.AmbientLight("#fff", 0.8); // 颜色，强度
+    currentThree.scene?.add(light);
+
+    const spotLight = new THREE.SpotLight("#fff", 0.8)
+    spotLight.position.set(20, 20, 20);
+
+    // 导入模型
+    const loader = new GLTFLoader(loadingManager);
+    // const dracoLoader = new DRACOLoader(loadingManager);
+    // dracoLoader.setDecoderPath(new URL(`./../assets/textures/03/draco`, import.meta.url).href);
+    // loader.setDRACOLoader(dracoLoader);
+
+    let mixers: any[] = [];
+    loader.load(new URL(`./../assets/textures/03/02.glb`, import.meta.url).href, (gltf: any) => {
+        gltf.scene.traverse((object: any) => {
+            if (object.isMesh) object.castShadow = true;
+        });
+        const model1 = SkeletonUtils.clone(gltf.scene);
+        const model2 = SkeletonUtils.clone(gltf.scene);
+        model1.rotation.y = -Math.PI / 1.5;
+        model2.rotation.y = -Math.PI / 1.5;
+        const mixer1 = new THREE.AnimationMixer(model1);
+        mixer1.clipAction(gltf.animations[1]).play(); // run
+        mixers.push(mixer1);
+        const mixer2 = new THREE.AnimationMixer(model2);
+        mixer2.clipAction(gltf.animations[3]).play(); // run
+        mixers.push(mixer2);
+        model1.position.z = - 2;
+        model2.position.z = 0;
+        currentThree.scene?.add(model1, model2);
+    })
     const clock = new THREE.Clock();
-
-    render3D({ time: undefined, scene, camera, cube, clock, controls });
-}
-
-type ThreeOptions = {
-    time?: number,
-    scene: THREE.Scene, // 场景
-    camera: THREE.PerspectiveCamera, // 相机
-    cube: THREE.Mesh, // 物体
-    clock: THREE.Clock,
-    controls: OrbitControls
-}
-
-function render3D(option: ThreeOptions) {
-    const { time = 0, scene, camera, cube, clock, controls } = option;
-    controls.update();
-    render.render(scene, camera);
-    // 浏览器每一次刷新都执行渲染
-    requestAnimationFrame((time) => render3D(option));
-}
+    render(() => {
+        const delta = clock.getDelta();
+        mixers.length > 0 && mixers.map((mixer) => mixer.update(delta));
+        controls.update();
+    });
+})
 
 </script>
 
 <template>
-    <div class="demo02"></div>
+    <div class="demo"></div>
 </template>
 <style lang="scss" scoped>
 .demo02 {
     height: 100%;
+    color: rgb(167, 211, 244);
 }
 </style>

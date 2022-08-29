@@ -7,3 +7,27 @@ body {
 * {
   box-sizing: border-box;
 }
+
+/*
+ ****************************
+ * 滚动条样式设置
+ ****************************
+ */
+::-webkit-scrollbar-track {
+  border-radius: 7px;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 7px;
+  background-color: rgba(170, 169, 169, 0.4);
+  border: 3px solid transparent;
+  &:hover {
+    background-color: rgba(170, 169, 169, 0.6);
+    transition: background-color 0.15s cubic-bezier(0.25, 0.1, 0.25, 0.1);
+  }
+}
