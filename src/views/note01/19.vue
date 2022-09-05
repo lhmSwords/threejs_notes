@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import * as THREE from 'three';
-import useThree from '../hooks/use-three';
+import useThree from '@/hooks/use-three';
 import gsap from 'gsap';
 import dat from 'dat.gui';
 
@@ -62,40 +62,39 @@ onMounted(() => {
     plane1.receiveShadow = true;
     currentThree.scene?.add(plane1);
 
-    // // 环境光，四面八方，不会产生阴影
+    // 环境光，四面八方，不会产生阴影
     const light = new THREE.AmbientLight("#fff", 0.8); // 颜色，强度
     currentThree.scene?.add(light);
 
-    // 点光源
-    const pointLight = new THREE.PointLight("#fff", 1)
-    // pointLight.position.set(10, 10, 10);
+    // 设置聚光灯
+    const spotLight = new THREE.SpotLight("#fff", 0.8)
+    spotLight.position.set(20, 20, 20);
+
     // 光照投射阴影开启
-    pointLight.castShadow = true;
-
-    const small = new THREE.Mesh(
-        new THREE.SphereBufferGeometry(0.5, 20, 20),
-        new THREE.MeshStandardMaterial({ color: "yellow" })
-    )
-    small.position.set(10, 10, 10);
-
-    small.add(pointLight)
-
-    currentThree.scene?.add(small);
+    spotLight.castShadow = true;
+    currentThree.scene?.add(spotLight);
 
     const gui = new dat.GUI();
-    gui.add(pointLight.position, 'x').min(0).max(20).step(0.01).name("光源X轴").onChange((value: any) => {
+    gui.add(spotLight.position, 'x').min(0).max(20).step(0.01).name("光源X轴").onChange((value: any) => {
         console.log('移动X轴->', value)
     });
-    gui.add(pointLight.position, 'y').min(0).max(20).step(0.01).name("光源y轴").onChange((value: any) => {
+    gui.add(spotLight.position, 'y').min(0).max(20).step(0.01).name("光源y轴").onChange((value: any) => {
         console.log('移动Y轴->', value)
     });
-
-    const clock = new THREE.Clock();
+    gui.add(spotLight, 'angle').min(0).max(Math.PI / 2).step(0.01).name("光源范围").onChange((value: any) => {
+        console.log('光源范围->', value)
+    });
+    gui.add(spotLight, 'distance').min(0).max(200).step(0.01).name("距离衰减").onChange((value: any) => {
+        console.log('光源距离->', value)
+    });
+    // gsap.to(spotLight.position, {
+    //     y: 150, // 动画变更属性
+    //     ease: "none", // "none"标识匀速运动
+    //     duration: 10, //持续时间
+    //     repeat: -1, // 循环次数，-1表示无限循环
+    // })
 
     render(() => {
-        const time = clock.getElapsedTime();
-        small.position.x = Math.sin(time) * 10
-        small.position.z = Math.cos(time) * 10
         controls.update();
     });
 })

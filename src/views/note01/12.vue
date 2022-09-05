@@ -1,7 +1,7 @@
 <script lang="ts" setup>
 import * as THREE from 'three';
 import { PlaneGeometry } from 'three';
-import useThree from '../hooks/use-three';
+import useThree from '@/hooks/use-three';
 
 const { currentThree, crateScene, initRenderer, perspectiveCamera, orbitControls, axesHelper, render } = useThree();
 

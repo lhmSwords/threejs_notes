@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import * as THREE from 'three';
-import useThree from '../hooks/use-three';
+import useThree from '@/hooks/use-three';
 import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader';
 
 // LoadingManager 加载管理器

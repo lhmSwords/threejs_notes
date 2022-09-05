@@ -1,11 +1,11 @@
-import * as THREE from "three";
+import { Scene, WebGLRenderer, Camera, AxesHelper, Color, Texture, sRGBEncoding, PerspectiveCamera } from 'three';
 // 导入轨道控制器
-import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
-import { ThreeTarget, BoxGeometryOption, Point } from "@/shared/types";
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+import { ThreeTarget, BoxGeometryOption, Point } from '@/shared/types';
 
 type ThreeOption = {
   scenebgcolor?: string;
-  scenebg?: THREE.Texture;
+  scenebg?: Texture;
 };
 
 interface UseThree {
@@ -15,21 +15,17 @@ interface UseThree {
    * 初始化场景
    * @returns 场景
    */
-  crateScene: (dom: Element) => THREE.Scene;
+  crateScene: (dom: Element) => Scene;
   /**
    * 初始化渲染器
    * @returns 渲染器
    */
-  initRenderer: () => THREE.WebGL1Renderer;
+  initRenderer: () => WebGLRenderer;
   /**
    * 创建透视摄像机
    * @returns 摄像机
    */
-  perspectiveCamera: (
-    point?: Point,
-    near?: number,
-    far?: number
-  ) => THREE.Camera;
+  perspectiveCamera: (point?: Point, near?: number, far?: number) => Camera;
   /**
    * 创建轨道控制器
    * @param camera 相机
@@ -42,7 +38,7 @@ interface UseThree {
    * @param scene 场景
    * @param size 坐标轴长度,默认10
    */
-  axesHelper: (size?: number) => THREE.AxesHelper;
+  axesHelper: (size?: number) => AxesHelper;
   /**
    * three渲染
    * @param renderer 渲染器
@@ -58,7 +54,7 @@ interface UseThree {
  */
 export default function useThree(
   options: ThreeOption = {
-    scenebgcolor: "#000",
+    scenebgcolor: '#000',
     scenebg: undefined,
   }
 ): UseThree {
@@ -75,14 +71,13 @@ export default function useThree(
    * 初始化场景
    * @returns 场景
    */
-  function crateScene(dom: Element): THREE.Scene {
+  function crateScene(dom: Element): Scene {
     container = dom;
     // 场景
-    currentThree.scene = new THREE.Scene();
+    currentThree.scene = new Scene();
     const { scenebgcolor, scenebg } = options;
     // 背景色
-    scenebgcolor &&
-      (currentThree.scene.background = new THREE.Color(scenebgcolor));
+    scenebgcolor && (currentThree.scene.background = new Color(scenebgcolor));
     // 纹理
     scenebg && (currentThree.scene.background = scenebg);
 
@@ -93,19 +88,16 @@ export default function useThree(
    * 初始化渲染器
    * @returns 渲染器
    */
-  function initRenderer(): THREE.WebGL1Renderer {
+  function initRenderer(): WebGLRenderer {
     // 渲染器
-    currentThree.renderer = new THREE.WebGL1Renderer({
+    currentThree.renderer = new WebGLRenderer({
       // 抗锯齿
       antialias: true,
       // 对数深度缓冲区 (加载外部模型去除闪烁适用)
       logarithmicDepthBuffer: true,
     });
-    currentThree.renderer.outputEncoding = THREE.sRGBEncoding;
-    currentThree.renderer.setSize(
-      container?.scrollWidth || 1000,
-      container?.scrollHeight || 800
-    );
+    currentThree.renderer.outputEncoding = sRGBEncoding;
+    currentThree.renderer.setSize(container?.scrollWidth || 1000, container?.scrollHeight || 800);
     container?.appendChild(currentThree.renderer.domElement);
     return currentThree.renderer;
   }
@@ -114,13 +106,9 @@ export default function useThree(
    * 创建透视摄像机
    * @returns 摄像机
    */
-  function perspectiveCamera(
-    point: Point = { x: 0, y: 0, z: 10 },
-    near?: number,
-    far?: number
-  ): THREE.Camera {
+  function perspectiveCamera(point: Point = { x: 0, y: 0, z: 10 }, near?: number, far?: number): Camera {
     currentThree.camera && currentThree.scene?.remove(currentThree.camera);
-    currentThree.camera = new THREE.PerspectiveCamera(
+    currentThree.camera = new PerspectiveCamera(
       75, // 视野角度
       (container?.scrollWidth || 1000) / (container?.scrollHeight || 800), // 长宽比
       near || 0.1, // 近截面,小于这个距离，不渲染
@@ -140,10 +128,7 @@ export default function useThree(
    * @returns
    */
   function orbitControls(): OrbitControls {
-    const controls = new OrbitControls(
-      currentThree.camera as THREE.Camera,
-      currentThree.renderer?.domElement
-    );
+    const controls = new OrbitControls(currentThree.camera as Camera, currentThree.renderer?.domElement);
     // 设置控制器阻尼，类似重力感应效果，并设置控制器update
     controls.enableDamping = true;
     return controls;
@@ -154,9 +139,9 @@ export default function useThree(
    * @param scene 场景
    * @param size 坐标轴长度,默认10
    */
-  function axesHelper(size: number = 20): THREE.AxesHelper {
+  function axesHelper(size: number = 20): AxesHelper {
     // 红色代表X轴,绿色代表Y轴,黄色代表Z轴
-    const axesHelper = new THREE.AxesHelper(size);
+    const axesHelper = new AxesHelper(size);
     currentThree.scene?.add(axesHelper);
     return axesHelper;
   }
@@ -170,10 +155,7 @@ export default function useThree(
    */
   function render(renderAction?: Function): void {
     renderAction && renderAction();
-    currentThree.renderer?.render(
-      currentThree.scene as THREE.Scene,
-      currentThree.camera as THREE.Camera
-    );
+    currentThree.renderer?.render(currentThree.scene as Scene, currentThree.camera as Camera);
     // 浏览器每一次刷新都执行渲染
     requestAnimationFrame(() => render(renderAction));
   }

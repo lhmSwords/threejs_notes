@@ -1,10 +1,10 @@
 <script lang="ts" setup>
 import * as THREE from 'three';
 import { PlaneGeometry } from 'three';
-import useThree from '../hooks/use-three';
+import useThree from '@/hooks/use-three';
 import gsap from 'gsap';
 
-// Light 物理光照效果
+// LoadingManager 加载管理器
 
 const { currentThree, crateScene, initRenderer, perspectiveCamera, orbitControls, axesHelper, render } = useThree({ scenebgcolor: "#eee" });
 
@@ -22,8 +22,24 @@ onMounted(() => {
     // 立方缓冲几何体
     geometry = new THREE.BoxGeometry(5, 5, 5);
     // materialColor = new THREE.Color(Math.random(), Math.random(), Math.random());
+
+    //  设置加载器
+    const loadingManager = new THREE.LoadingManager();
+
+    loadingManager.onLoad = () => {
+        console.log("加载完成")
+    }
+    loadingManager.onProgress = (url: string, itemsLoaded: number, itemsTotal: number) => {
+        // itemsLoaded 已加载数
+        // itemsTotal 总数
+        console.log("加载进度", Number(((itemsLoaded / itemsTotal) * 100).toFixed(2)) + '%')
+    }
+    loadingManager.onError = (url) => {
+        console.log("加载错误", url)
+    }
+
     // 纹理加载器
-    const textureLoader = new THREE.TextureLoader();
+    const textureLoader = new THREE.TextureLoader(loadingManager);
     const treeTexture = textureLoader.load(new URL(`./../assets/images/test.png`, import.meta.url).href);
     // const alphaTexture = textureLoader.load("");// 加载黑白底色图片，黑色部分为透明部分，白色为不透明部分
     // 设置纹理中心点

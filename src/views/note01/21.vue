@@ -1,6 +1,6 @@
 <script lang="ts" setup>
 import * as THREE from 'three';
-import useThree from '../hooks/use-three';
+import useThree from '@/hooks/use-three';
 import gsap from 'gsap';
 import dat from 'dat.gui';
 // 模型导入器

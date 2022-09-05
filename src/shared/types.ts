@@ -2,7 +2,7 @@ export type ThreeTarget = {
   /**场景 */
   scene?: THREE.Scene;
   /**渲染器 */
-  renderer?: THREE.WebGL1Renderer;
+  renderer?: THREE.WebGLRenderer;
   /**相机 */
   camera?: THREE.Camera;
 };

@@ -16,7 +16,8 @@
     "paths": {
       "@/router/*": ["./src/router/*"],
       "@/plugins/*": ["./src/plugins/*"],
-      "@/shared/*": ["./src/shared/*"]
+      "@/shared/*": ["./src/shared/*"],
+      "@/hooks/*": ["./src/hooks/*"],
     }
   },
   "include": [

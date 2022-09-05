@@ -1,8 +1,7 @@
 <script lang="ts" setup>
 import * as THREE from 'three';
-import useThree from '../hooks/use-three';
+import useThree from '@/hooks/use-three';
 import gsap from 'gsap';
-import dat from 'dat.gui';
 
 // 灯光与阴影
 // - 具备条件
@@ -52,9 +51,17 @@ onMounted(() => {
     sphere.castShadow = true;
     currentThree.scene?.add(sphere);
 
+    //  生成一个平面
+    const planeGeometry = new THREE.PlaneBufferGeometry(40, 40);
+    const plane = new THREE.Mesh(planeGeometry, material);
+    plane.position.set(-20, 0, -20)
+    plane.rotation.y = Math.PI / 4
+    // 设置接收阴影开启
+    plane.receiveShadow = true;
+    currentThree.scene?.add(plane);
 
     //  生成一个平面1
-    const planeGeometry1 = new THREE.PlaneBufferGeometry(80, 80);
+    const planeGeometry1 = new THREE.PlaneBufferGeometry(40, 40);
     const plane1 = new THREE.Mesh(planeGeometry1, material);
     plane1.position.set(0, -5, 0)
     plane1.rotation.x = - Math.PI / 2
@@ -66,33 +73,23 @@ onMounted(() => {
     const light = new THREE.AmbientLight("#fff", 0.8); // 颜色，强度
     currentThree.scene?.add(light);
 
-    // 设置聚光灯
-    const spotLight = new THREE.SpotLight("#fff", 0.8)
-    spotLight.position.set(20, 20, 20);
-
+    // 设置平行光
+    const directionalLight = new THREE.DirectionalLight("#fff", 1)
+    directionalLight.position.set(20, 0, 20);
     // 光照投射阴影开启
-    spotLight.castShadow = true;
-    currentThree.scene?.add(spotLight);
+    directionalLight.castShadow = true;
+    // 设置阴影模糊度
+    directionalLight.shadow.radius = 20;
+    // 设置阴影贴图分辨率
+    // directionalLight.shadow.mapSize.set(2048, 2048);
+    currentThree.scene?.add(directionalLight);
 
-    const gui = new dat.GUI();
-    gui.add(spotLight.position, 'x').min(0).max(20).step(0.01).name("光源X轴").onChange((value: any) => {
-        console.log('移动X轴->', value)
-    });
-    gui.add(spotLight.position, 'y').min(0).max(20).step(0.01).name("光源y轴").onChange((value: any) => {
-        console.log('移动Y轴->', value)
-    });
-    gui.add(spotLight, 'angle').min(0).max(Math.PI / 2).step(0.01).name("光源范围").onChange((value: any) => {
-        console.log('光源范围->', value)
-    });
-    gui.add(spotLight, 'distance').min(0).max(200).step(0.01).name("距离衰减").onChange((value: any) => {
-        console.log('光源距离->', value)
-    });
-    // gsap.to(spotLight.position, {
-    //     y: 150, // 动画变更属性
-    //     ease: "none", // "none"标识匀速运动
-    //     duration: 10, //持续时间
-    //     repeat: -1, // 循环次数，-1表示无限循环
-    // })
+    gsap.to(directionalLight.position, {
+        y: 150, // 动画变更属性
+        ease: "none", // "none"标识匀速运动
+        duration: 10, //持续时间
+        repeat: -1, // 循环次数，-1表示无限循环
+    })
 
     render(() => {
         controls.update();
