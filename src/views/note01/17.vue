@@ -43,7 +43,7 @@ onMounted(() => {
 
     const rgbeLoader = new RGBELoader(loadingManager);
     // 必须加载hdr文件
-    rgbeLoader.loadAsync(new URL(`./../assets/textures/02/05.hdr`, import.meta.url).href).then((texture) => {
+    rgbeLoader.loadAsync(new URL(`./../../assets/textures/02/05.hdr`, import.meta.url).href).then((texture) => {
         texture.mapping = THREE.EquirectangularReflectionMapping;
         currentThree.scene && (currentThree.scene.background = texture);
         currentThree.scene && (currentThree.scene.environment = texture);

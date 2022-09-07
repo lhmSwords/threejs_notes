@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@element-plus/icons-vue": "^2.0.9",
-    "element-plus": "^2.2.13",
+    "element-plus": "^2.2.16",
     "gsap": "^3.10.4",
     "three": "^0.143.0",
     "vue": "^3.2.37",

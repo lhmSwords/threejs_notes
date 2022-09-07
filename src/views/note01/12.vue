@@ -21,7 +21,7 @@ onMounted(() => {
     // materialColor = new THREE.Color(Math.random(), Math.random(), Math.random());
     // 纹理加载器
     const textureLoader = new THREE.TextureLoader();
-    const treeTexture = textureLoader.load(new URL(`./../assets/images/test.png`, import.meta.url).href);
+    const treeTexture = textureLoader.load(new URL(`./../../assets/images/test.png`, import.meta.url).href);
     const alphaTexture = textureLoader.load("");// 加载黑白底色图片，黑色部分为透明部分，白色为不透明部分
     // 设置纹理中心点
     treeTexture.center.set(0.5, 0.5);

@@ -18,7 +18,7 @@ onMounted(() => {
     geometry = new THREE.BoxGeometry(5, 5, 5);
     materialColor = new THREE.Color(Math.random(), Math.random(), Math.random());
     // 纹理加载器
-    const textureLoader = new THREE.TextureLoader().load(new URL(`./../assets/images/test.png`, import.meta.url).href);
+    const textureLoader = new THREE.TextureLoader().load(new URL(`./../../assets/images/test.png`, import.meta.url).href);
     // 设置纹理中心点
     textureLoader.center.set(0.5, 0.5);
     // 设置纹理旋转

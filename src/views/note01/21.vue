@@ -64,11 +64,11 @@ onMounted(() => {
     // 导入模型
     const loader = new GLTFLoader(loadingManager);
     // const dracoLoader = new DRACOLoader(loadingManager);
-    // dracoLoader.setDecoderPath(new URL(`./../assets/textures/03/draco`, import.meta.url).href);
+    // dracoLoader.setDecoderPath(new URL(`./../../assets/textures/03/draco`, import.meta.url).href);
     // loader.setDRACOLoader(dracoLoader);
 
     let mixers: any[] = [];
-    loader.load(new URL(`./../assets/textures/03/02.glb`, import.meta.url).href, (gltf: any) => {
+    loader.load(new URL(`./../../assets/textures/03/02.glb`, import.meta.url).href, (gltf: any) => {
         gltf.scene.traverse((object: any) => {
             if (object.isMesh) object.castShadow = true;
         });

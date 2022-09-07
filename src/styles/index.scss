@@ -31,3 +31,28 @@ body {
     transition: background-color 0.15s cubic-bezier(0.25, 0.1, 0.25, 0.1);
   }
 }
+
+.page-container {
+  display: flex;
+  flex: 1 0 0%;
+  overflow: hidden;
+}
+
+.side-container {
+  width: 200px;
+  flex-shrink: 0;
+  border-right: 1px solid var(--el-border-color);
+  overflow: auto;
+}
+
+.el-menu {
+  border: none;
+}
+
+.main-container {
+  padding: 20px 30px;
+  flex: 1 0 0%;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}

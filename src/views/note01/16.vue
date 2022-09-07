@@ -38,12 +38,12 @@ onMounted(() => {
     // 设置环境贴图
     const cubeTextureLoader = new THREE.CubeTextureLoader(loadingManager);
     const envMapTexture = cubeTextureLoader.load([
-        new URL(`./../assets/textures/01/px.jpg`, import.meta.url).href,
-        new URL(`./../assets/textures/01/nx.jpg`, import.meta.url).href,
-        new URL(`./../assets/textures/01/py.jpg`, import.meta.url).href,
-        new URL(`./../assets/textures/01/ny.jpg`, import.meta.url).href,
-        new URL(`./../assets/textures/01/pz.jpg`, import.meta.url).href,
-        new URL(`./../assets/textures/01/nz.jpg`, import.meta.url).href,
+        new URL(`./../../assets/textures/01/px.jpg`, import.meta.url).href,
+        new URL(`./../../assets/textures/01/nx.jpg`, import.meta.url).href,
+        new URL(`./../../assets/textures/01/py.jpg`, import.meta.url).href,
+        new URL(`./../../assets/textures/01/ny.jpg`, import.meta.url).href,
+        new URL(`./../../assets/textures/01/pz.jpg`, import.meta.url).href,
+        new URL(`./../../assets/textures/01/nz.jpg`, import.meta.url).href,
     ]);
     // 几何体
     const sphereGeometry = new THREE.SphereBufferGeometry(10, 30, 30);
